@@ -79,17 +79,24 @@ type Iterator struct {
 	captured         []byte
 	Error            error
 	Attachment       interface{} // open for customized decoder
+	interner         *interner
 }
 
 // NewIterator creates an empty Iterator instance
 func NewIterator(cfg API) *Iterator {
+	var i *interner = nil
+	if cfg.(*frozenConfig).intern {
+		i = newInterner()
+	}
+
 	return &Iterator{
-		cfg:    cfg.(*frozenConfig),
-		reader: nil,
-		buf:    nil,
-		head:   0,
-		tail:   0,
-		depth:  0,
+		cfg:      cfg.(*frozenConfig),
+		reader:   nil,
+		buf:      nil,
+		head:     0,
+		tail:     0,
+		depth:    0,
+		interner: i,
 	}
 }
 

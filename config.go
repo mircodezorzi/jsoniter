@@ -25,6 +25,7 @@ type Config struct {
 	ValidateJsonRawMessage        bool
 	ObjectFieldMustBeSimpleString bool
 	CaseSensitive                 bool
+	Intern                        bool
 }
 
 // API the public interface of this package.
@@ -49,6 +50,7 @@ type API interface {
 // ConfigDefault the default API
 var ConfigDefault = Config{
 	EscapeHTML: true,
+	Intern:     true,
 }.Froze()
 
 // ConfigCompatibleWithStandardLibrary tries to be 100% compatible with standard library behavior
@@ -80,6 +82,7 @@ type frozenConfig struct {
 	streamPool                    *sync.Pool
 	iteratorPool                  *sync.Pool
 	caseSensitive                 bool
+	intern                        bool
 }
 
 func (cfg *frozenConfig) initCache() {
@@ -134,6 +137,7 @@ func (cfg Config) Froze() API {
 		onlyTaggedField:               cfg.OnlyTaggedField,
 		disallowUnknownFields:         cfg.DisallowUnknownFields,
 		caseSensitive:                 cfg.CaseSensitive,
+		intern:                        cfg.Intern,
 	}
 	api.streamPool = &sync.Pool{
 		New: func() interface{} {

@@ -7,12 +7,24 @@ import (
 
 // ReadString read string from iterator
 func (iter *Iterator) ReadString() (ret string) {
+	if iter.cfg.intern && iter.interner != nil {
+		return iter.interner.String(iter.readString())
+	} else {
+		return iter.readString()
+	}
+}
+
+func (iter *Iterator) readString() (ret string) {
 	c := iter.nextToken()
 	if c == '"' {
 		for i := iter.head; i < iter.tail; i++ {
 			c := iter.buf[i]
 			if c == '"' {
-				ret = string(iter.buf[iter.head:i])
+				if iter.cfg.intern && iter.interner != nil {
+					ret = iter.interner.Bytes(iter.buf[iter.head:i])
+				} else {
+					ret = string(iter.buf[iter.head:i])
+				}
 				iter.head = i + 1
 				return ret
 			} else if c == '\\' {
@@ -38,7 +50,11 @@ func (iter *Iterator) readStringSlowPath() (ret string) {
 	for iter.Error == nil {
 		c = iter.readByte()
 		if c == '"' {
-			return string(str)
+			if iter.cfg.intern && iter.interner != nil {
+				return iter.interner.Bytes(str)
+			} else {
+				return string(str)
+			}
 		}
 		if c == '\\' {
 			c = iter.readByte()
